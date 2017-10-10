@@ -203,7 +203,7 @@ module.exports = function (unitPaymentOrder) {
                     text: `${currency}`
                 }, {
                         width: '*',
-                        text: item.price.toLocaleString(locale, locale.currencyNotaItern2),  
+                        text: parseFloat(item.price).toLocaleString(locale, locale.currencyNotaItern),
                         style: ['right']
                     }],
                 style: ['size08']
