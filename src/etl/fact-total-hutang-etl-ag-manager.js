@@ -18,7 +18,6 @@ module.exports = class FactTotalHutang extends BaseManager {
         this.unitReceiptNoteManager = new UnitReceiptNoteManager(db, user);
         this.unitPaymentOrderManager = new UnitPaymentOrderManager(db, user);
         this.migrationLog = this.db.collection("migration-log");
-
     }
 
     run() {
@@ -83,7 +82,8 @@ module.exports = class FactTotalHutang extends BaseManager {
                 "items.deliveredQuantity": 1,
                 "items.currencyRate": 1,
                 "items.product.name": 1,
-                "items.product.code": 1
+                "items.product.code": 1,
+                _deleted: 1
             }).toArray()
             .then((unitReceiptNotes) => {
                 return this.joinUnitPaymentOrder(unitReceiptNotes);
@@ -105,7 +105,8 @@ module.exports = class FactTotalHutang extends BaseManager {
                     dueDate: 1,
                     "supplier.name": 1,
                     "category.name": 1,
-                    "division.name": 1
+                    "division.name": 1,
+                    _deleted: 1
                 }).toArray()
                 .then((unitPaymentOrders) => {
                     var arr = unitPaymentOrders.map((unitPaymentOrder) => {
@@ -143,8 +144,8 @@ module.exports = class FactTotalHutang extends BaseManager {
 
                     return {
                         unitPaymentOrderNo: `'${unitPaymentOrder.no}'`,
-                        unitPaymentOrderDate: `'${moment(unitPaymentOrder.date).format('L')}'`,
-                        unitPaymentOrderDueDate: `'${moment(unitPaymentOrder.dueDate).format('L')}'`,
+                        unitPaymentOrderDate: `'${moment(unitPaymentOrder.date).add(7, "hours").format("YYYY-MM-DD")}'`,
+                        unitPaymentOrderDueDate: `'${moment(unitPaymentOrder.dueDate).add(7, "hours").format("YYYY-MM-DD")}'`,
                         supplierName: `'${unitPaymentOrder.supplier.name.replace(/'/g, '"')}'`,
                         categoryName: `'${unitPaymentOrder.category.name}'`,
                         categoryType: `'${unitPaymentOrder.category.name.toLowerCase() === "bahan baku" ? "BAHAN BAKU" : "NON BAHAN BAKU"}'`,
@@ -189,18 +190,15 @@ module.exports = class FactTotalHutang extends BaseManager {
                     transaction.begin((err) => {
 
                         var request = this.sql.transactionRequest(transaction);
-
                         var command = [];
-
                         var sqlQuery = '';
-
                         var count = 1;
 
                         for (var item of data) {
                             if (item) {
                                 var queryString = `insert into AG_fact_total_hutang_temp([ID Fact Total Hutang], [Nomor Nota Intern], [Tanggal Nota Intern], [Nama Supplier], [Jenis Kategori], [Harga Sesuai Invoice], [Jumlah Sesuai Bon Unit], [Rate Yang Disepakati], [Total Harga Nota Intern], [Nama Kategori], [Nama Divisi], [Nama Unit], [nomor bon unit], [nama produk], [kode produk],[deleted Unit Receipt Note],[deleted Unit Payment Order]) values(${count}, ${item.unitPaymentOrderNo}, ${item.unitPaymentOrderDate}, ${item.supplierName}, ${item.categoryType}, ${item.invoicePrice}, ${item.unitReceiptNoteQuantity}, ${item.purchaseOrderExternalCurrencyRate}, ${item.total}, ${item.categoryName}, ${item.divisionName}, ${item.unitName}, ${item.unitReceiptNoteNo}, ${item.productName}, ${item.productCode},${item.deletedUnitRecipe},${item.deletedPaymentOrder});\n`;
                                 sqlQuery = sqlQuery.concat(queryString);
-                                if (count % 1000 == 0) {
+                                if (count % 2000 == 0) {
                                     command.push(this.insertQuery(request, sqlQuery));
                                     sqlQuery = "";
                                 }
@@ -214,17 +212,17 @@ module.exports = class FactTotalHutang extends BaseManager {
 
                         this.sql.multiple = true;
 
-                        // var fs = require("fs");
+                        var fs = require("fs");
 
-                        // var path = "C:\\Users\\aditya.henanda\\Desktop\\fact.txt";
+                        var path = "C:\\Users\\indri.hutabalian\\Desktop\\fact-total-hutang.txt";
 
-                        // fs.writeFile(path, sqlQuery, function (error) {
-                        //     if (error) {
-                        //         console.log("write error:  " + error.message);
-                        //     } else {
-                        //         console.log("Successful Write to " + path);
-                        //     }
-                        // });
+                        fs.writeFile(path, sqlQuery, function (error) {
+                            if (error) {
+                                console.log("write error:  " + error.message);
+                            } else {
+                                console.log("Successful Write to " + path);
+                            }
+                        });
 
                         return Promise.all(command)
                             .then((results) => {
