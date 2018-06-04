@@ -1,6 +1,7 @@
 module.exports = {
     master: {
         product: require('./data-util/master/product-data-util'),
+        storage: require('./data-util/master/storage-data-util'),
         uom: require('./data-util/master/uom-data-util'),
         vat: require('./data-util/master/vat-data-util'),
         currency: require('./data-util/master/currency-data-util'),

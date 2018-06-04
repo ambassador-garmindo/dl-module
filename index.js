@@ -3,10 +3,11 @@ module.exports = {
         auth: {
             AccountManager: require("./src/managers/auth/account-manager"),
             RoleManager: require("./src/managers/auth/role-manager"),
-            ApiEndpointManager: require("./src/managers/auth/api-endpoint-manager")
+            ApiEndpointManager: require("./src/managers/auth/api-endpoint-manager"),
         },
         master: {
             BuyerManager: require("./src/managers/master/buyer-manager"),
+            StorageManager: require("./src/managers/master/storage-manager"),
             SupplierManager: require("./src/managers/master/supplier-manager"),
             ProductManager: require("./src/managers/master/product-manager"),
             CategoryManager: require('./src/managers/master/category-manager'),
@@ -80,6 +81,7 @@ module.exports = {
             },
             master: {
                 accountBank: require("./test/data-util/master/account-bank-data-util"),
+                storage: require("./test/data-util/master/storage-data-util"),
                 budget: require("./test/data-util/master/budget-data-util"),
                 buyer: require("./test/data-util/master/buyer-data-util"),
                 category: require("./test/data-util/master/category-data-util"),
@@ -136,7 +138,8 @@ module.exports = {
         },
         dim: {
             dimDivision: require("./src/etl/dim-division-etl-ag-manager"),
-            dimSupplier: require("./src/etl/dim-supplier-etl-ag-manager")
+            dimSupplier: require("./src/etl/dim-supplier-etl-ag-manager"),
+            dimStorage: require("./src/etl/dim-storage-etl-manager")
         }
     }
 }
